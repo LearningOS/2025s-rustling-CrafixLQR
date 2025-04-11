@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,7 +36,29 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+        let mut idx = self.count;
+        
+        while idx > 1 {
+            let parent = self.parent_idx(idx);
+            if (self.comparator)(&self.items[idx], &self.items[parent]) {
+                self.items.swap(idx, parent);
+                idx = parent;
+            } else {
+                break;
+            }
+        }
+    }
+
+    fn smallest_child_idx(&self, idx: usize) -> usize {
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+        if right <= self.count && (self.comparator)(&self.items[right], &self.items[left]) {
+            right
+        } else {
+            left
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -54,11 +75,6 @@ where
 
     fn right_child_idx(&self, idx: usize) -> usize {
         self.left_child_idx(idx) + 1
-    }
-
-    fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
     }
 }
 
@@ -84,8 +100,38 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+        
+        let mut result = T::default();
+        std::mem::swap(&mut result, &mut self.items[1]);
+        
+        if self.count > 1 {
+            self.items[1] = self.items.pop().unwrap();
+        } else {
+            self.items.pop();
+        }
+        
+        self.count -= 1;
+        
+        if !self.is_empty() {
+            let mut current = 1;
+            
+
+            while self.children_present(current) {
+                let smallest = self.smallest_child_idx(current);
+                
+                if (self.comparator)(&self.items[smallest], &self.items[current]) {
+                    self.items.swap(smallest, current);
+                    current = smallest;
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        Some(result)
     }
 }
 
